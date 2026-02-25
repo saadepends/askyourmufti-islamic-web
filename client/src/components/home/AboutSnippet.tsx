@@ -20,7 +20,7 @@ export const AboutSnippet = () => {
     ];
 
     return (
-        <section className="py-20 md:py-28 px-6 md:px-12 bg-white relative overflow-hidden">
+        <section className="py-20 md:py-28 px-4 sm:px-6 md:px-12 bg-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/[0.03] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/[0.03] rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
@@ -55,7 +55,7 @@ export const AboutSnippet = () => {
                         <p className="text-foreground/50 text-base leading-relaxed mb-4">{t(locale, "about.p1")}</p>
                         <p className="text-foreground/40 text-sm leading-relaxed mb-8">{t(locale, "about.p2")}</p>
 
-                        <div className="flex gap-8 mb-10 pb-8 border-b border-accent/10">
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-6 sm:gap-8 mb-10 pb-8 border-b border-accent/10">
                             {highlights.map((item) => (
                                 <div key={item.label} className="text-center">
                                     <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-accent/8 flex items-center justify-center text-accent border border-accent/15">

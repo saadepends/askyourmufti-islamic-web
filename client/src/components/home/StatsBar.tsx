@@ -18,7 +18,7 @@ export const StatsBar = () => {
     ];
 
     return (
-        <div className="relative z-10 -mt-12 max-w-6xl mx-auto px-4 md:px-6">
+        <div className="relative z-10 max-w-6xl mx-auto px-0">
             <div className="bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-10 shadow-xl border border-accent/15 overflow-hidden">
                 {/* Decorative background elements */}
                 <div className="absolute top-0 left-0 w-40 h-40 bg-accent/5 rounded-full blur-3xl pointer-events-none" />

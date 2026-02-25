@@ -9,6 +9,8 @@ const AskedQuestionSchema = new mongoose.Schema(
         question: { type: String, required: true, trim: true },
         consent: { type: Boolean, required: true, default: false },
         status: { type: String, enum: ['new', 'reviewed'], default: 'new' },
+        adminAnswer: { type: String, trim: true, default: '' },
+        answeredAt: { type: Date },
     },
     { timestamps: true }
 );

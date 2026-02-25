@@ -137,7 +137,7 @@ export const TopicsMarquee = () => {
 
     return (
         <section className="py-16 md:py-20 overflow-hidden bg-ivory">
-            <div className="text-center mb-12 px-6">
+            <div className="text-center mb-12 px-4 sm:px-6">
                 <span className="inline-block px-5 py-2 bg-accent/10 text-accent rounded-full text-xs font-bold tracking-[0.2em] uppercase mb-4 border border-accent/20">
                     {locale === "ur" ? "\u0632\u0645\u0631\u06d2 \u062f\u06cc\u06a9\u06be\u06cc\u06ba" : locale === "de" ? "Kategorien" : locale === "fr" ? "Cat\u00e9gories" : locale === "es" ? "Categor\u00edas" : "Explore Categories"}
                 </span>

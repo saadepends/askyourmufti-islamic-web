@@ -128,11 +128,29 @@ export default function AboutPage() {
                             <p>{locale === "ur" ? "ان کی تعلیمات روایتی علم اور عصری مسائل کے درمیان مضبوط ربط پیدا کرتی ہیں۔" : "His work bridges classical scholarship with contemporary understanding for Muslims worldwide."}</p>
                             <p>{locale === "ur" ? "نماز، زکوٰۃ، نکاح، کاروبار اور روزمرہ زندگی سے متعلق سوالات کے جوابات یہاں دستیاب ہیں۔" : "From Salah and Zakat to marriage, finance, and everyday ethical issues, his lectures cover broad topics."}</p>
                         </div>
-                        <div className="flex gap-8 mt-8 pt-8 border-t border-accent/15">
+                        <div className="flex flex-wrap justify-center md:justify-start gap-8 mt-8 pt-8 border-t border-accent/15">
                             <div className="text-center"><div className="text-3xl font-serif font-bold text-accent">25K+</div><div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">{copy.stats[0]}</div></div>
                             <div className="text-center"><div className="text-3xl font-serif font-bold text-accent">1.2K+</div><div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">{copy.stats[1]}</div></div>
                             <div className="text-center"><div className="text-3xl font-serif font-bold text-accent">5</div><div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">{copy.stats[2]}</div></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="py-16 md:py-20 px-6 md:px-12 bg-white">
+                <div className="max-w-4xl mx-auto rounded-3xl border border-accent/15 bg-ivory p-7 md:p-10 shadow-sm">
+                    <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent rounded-full text-[11px] font-bold tracking-[0.18em] uppercase mb-4 border border-accent/20">
+                        Who We Are
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-6">Who We Are?</h2>
+
+                    <div className="space-y-4 text-gray-600 leading-relaxed text-sm md:text-base">
+                        <p>This platform began as a student&apos;s attempt to understand his faith more deeply.</p>
+                        <p>As someone who continues to learn from the lectures and Q&amp;A sessions of Tariq Masood, I often found myself revisiting the same questions — about daily life, modern challenges, family matters, and personal responsibilities. His explanations brought clarity where there was confusion and balance where there were extremes.</p>
+                        <p>But the answers were spread across hundreds of hours of sessions.</p>
+                        <p>So I began organizing them — first for myself, to study, reflect, and grow. Over time, I realized that many others might be searching for the same clarity.</p>
+                        <p>This website is simply a structured collection of that learning journey.</p>
+                        <p>It is not a claim of scholarship, nor a replacement for proper guidance. It is an effort — from one student — to make beneficial knowledge easier to find, with clear references and timestamps, for anyone sincerely seeking understanding.</p>
                     </div>
                 </div>
             </section>

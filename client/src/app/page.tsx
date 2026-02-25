@@ -15,7 +15,7 @@ export default function HomePage() {
 
             <Hero />
 
-            <section className="relative z-10 -mt-12 container mx-auto px-4 md:px-8">
+            <section className="relative z-10 -mt-6 md:-mt-10 container mx-auto px-4 md:px-8">
                 <StatsBar />
             </section>
 

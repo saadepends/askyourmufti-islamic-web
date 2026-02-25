@@ -78,7 +78,7 @@ export const MostViewedQuestions = () => {
     }, [locale]);
 
     return (
-        <section className="py-16 md:py-24 px-6 md:px-12 bg-ivory">
+        <section className="py-16 md:py-24 px-4 sm:px-6 md:px-12 bg-ivory">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                     <div>
@@ -116,7 +116,7 @@ export const MostViewedQuestions = () => {
                             <Link
                                 key={item._id}
                                 href={withLocale(`/question/${item.slug}`, locale)}
-                                className="group relative flex gap-5 bg-white rounded-2xl p-6 border border-accent/8 hover:border-accent/25 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 transition-all duration-300"
+                                className="group relative flex gap-4 sm:gap-5 bg-white rounded-2xl p-4 sm:p-6 border border-accent/8 hover:border-accent/25 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 transition-all duration-300"
                             >
                                 <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary-dark flex items-center justify-center shadow-md shadow-primary/15 group-hover:scale-105 transition-transform">
                                     <span className="text-accent font-serif font-bold text-lg">{String(index + 1).padStart(2, "0")}</span>

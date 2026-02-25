@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Menu, Globe, ChevronDown, X, MessageCircle, Heart } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, Globe, Heart, Menu, MessageCircle, Search, X } from "lucide-react";
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
 import { cn } from "@/lib/utils";
 import { getLocaleFromPathname, Locale, withLocale } from "@/lib/i18n";
@@ -30,17 +30,20 @@ const FALLBACK_TOPICS = [
 ];
 
 const LANGUAGES: Array<{ code: Locale; name: string; short: string }> = [
-    { code: "en", name: "English", short: "GB" },
-    { code: "ur", name: "اردو", short: "PK" },
+    { code: "en", name: "English", short: "EN" },
+    { code: "ur", name: "Urdu", short: "UR" },
     { code: "de", name: "Deutsch", short: "DE" },
-    { code: "fr", name: "Français", short: "FR" },
-    { code: "es", name: "Español", short: "ES" },
+    { code: "fr", name: "French", short: "FR" },
+    { code: "es", name: "Spanish", short: "ES" },
 ];
 
 export const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [topics, setTopics] = useState(FALLBACK_TOPICS);
+    const [navSearch, setNavSearch] = useState("");
     const pathname = usePathname();
+    const router = useRouter();
+
     const currentLocale = getLocaleFromPathname(pathname || "/");
     const localize = (path: string) => withLocale(path, currentLocale);
     const switchLocale = (locale: Locale) => withLocale(pathname || "/", locale);
@@ -51,9 +54,9 @@ export const Navbar = () => {
                 const res = await fetch(`${API_URL}/topics`);
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
-                    const mapped = (data as TopicItem[]).map((t) => ({
-                        name: t.name,
-                        slug: t.slug || t.name.toLowerCase().replace(/\s+/g, "-"),
+                    const mapped = (data as TopicItem[]).map((item) => ({
+                        name: item.name,
+                        slug: item.slug || item.name.toLowerCase().replace(/\s+/g, "-"),
                     }));
                     setTopics(mapped);
                 }
@@ -65,133 +68,194 @@ export const Navbar = () => {
         fetchTopics();
     }, []);
 
+    const handleNavSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const next = navSearch.trim();
+        router.push(next ? `${localize("/search")}?q=${encodeURIComponent(next)}` : localize("/search"));
+    };
+
     return (
         <>
             <motion.nav
-                initial={{ y: -100 }}
+                initial={{ y: -80 }}
                 animate={{ y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-accent/15 shadow-sm"
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-accent/15 shadow-sm"
             >
-                <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3">
-                    <Link href={localize("/")} className="flex items-center gap-2 shrink-0">
-                        <Image
-                            src="/logo.png"
-                            alt="Ask Your Mufti Logo"
-                            width={220}
-                            height={220}
-                            className="rounded-full object-cover border border-accent/30"
-                            priority
-                        />
-                       
-                    </Link>
+                <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+                    <div className="hidden lg:grid grid-cols-[1fr_minmax(220px,340px)_auto] items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                            <Link href={localize("/")} className="flex items-center gap-2 shrink-0">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Ask Your Mufti Logo"
+                                    width={200}
+                                    height={200}
+                                    className="rounded-full object-cover border border-accent/30"
+                                    priority
+                                />
+                               
+                            </Link>
 
-                    <div className="hidden lg:flex items-center gap-1">
-                        <Link href={localize("/")} className="px-4 py-2 text-sm font-bold tracking-wide text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all">
-                            {t(currentLocale, "nav.home")}
-                        </Link>
+                            <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+                                <Link href={localize("/")} className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all whitespace-nowrap">
+                                    {t(currentLocale, "nav.home")}
+                                </Link>
 
-                        <HeadlessMenu as="div" className="relative">
-                            <HeadlessMenu.Button className="px-4 py-2 text-sm font-bold tracking-wide text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all inline-flex items-center gap-1 focus:outline-none">
-                                {t(currentLocale, "nav.topics")}
-                                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-                            </HeadlessMenu.Button>
-                            <Transition
-                                as={React.Fragment}
-                                enter="transition ease-out duration-150"
-                                enterFrom="transform opacity-0 scale-95 -translate-y-1"
-                                enterTo="transform opacity-100 scale-100 translate-y-0"
-                                leave="transition ease-in duration-100"
-                                leaveFrom="transform opacity-100 scale-100"
-                                leaveTo="transform opacity-0 scale-95"
-                            >
-                                <HeadlessMenu.Items className="absolute left-0 mt-2 w-52 origin-top-left rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2">
-                                    {topics.map((topic) => (
-                                        <HeadlessMenu.Item key={topic.slug}>
-                                            {({ active }) => (
-                                                <Link
-                                                    href={localize(`/topics/${topic.slug}`)}
-                                                    className={cn(
-                                                        "block px-4 py-2.5 text-sm font-medium transition-all",
-                                                        active ? "bg-accent/10 text-accent" : "text-foreground/70"
+                                <HeadlessMenu as="div" className="relative">
+                                    <HeadlessMenu.Button className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all inline-flex items-center gap-1 whitespace-nowrap">
+                                        {t(currentLocale, "nav.topics")}
+                                        <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                                    </HeadlessMenu.Button>
+                                    <Transition
+                                        as={React.Fragment}
+                                        enter="transition ease-out duration-150"
+                                        enterFrom="transform opacity-0 scale-95 -translate-y-1"
+                                        enterTo="transform opacity-100 scale-100 translate-y-0"
+                                        leave="transition ease-in duration-100"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <HeadlessMenu.Items className="absolute left-0 mt-2 w-52 origin-top-left rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2">
+                                            {topics.map((topic) => (
+                                                <HeadlessMenu.Item key={topic.slug}>
+                                                    {({ active }) => (
+                                                        <Link
+                                                            href={localize(`/topics/${topic.slug}`)}
+                                                            className={cn(
+                                                                "block px-4 py-2.5 text-sm font-medium transition-all",
+                                                                active ? "bg-accent/10 text-accent" : "text-foreground/70"
+                                                            )}
+                                                        >
+                                                            {translateTopicLabel(topic.name, currentLocale)}
+                                                        </Link>
                                                     )}
-                                                >
-                                                    {translateTopicLabel(topic.name, currentLocale)}
-                                                </Link>
-                                            )}
-                                        </HeadlessMenu.Item>
-                                    ))}
-                                </HeadlessMenu.Items>
-                            </Transition>
-                        </HeadlessMenu>
+                                                </HeadlessMenu.Item>
+                                            ))}
+                                        </HeadlessMenu.Items>
+                                    </Transition>
+                                </HeadlessMenu>
 
-                        <Link href={localize("/sessions")} className="px-4 py-2 text-sm font-bold tracking-wide text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all">
-                            {t(currentLocale, "nav.sessions")}
-                        </Link>
+                                <Link href={localize("/sessions")} className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all whitespace-nowrap">
+                                    {t(currentLocale, "nav.sessions")}
+                                </Link>
+                                <Link href={localize("/qa")} className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all whitespace-nowrap">
+                                    {t(currentLocale, "nav.qa")}
+                                </Link>
+                                <Link href={localize("/about")} className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all whitespace-nowrap">
+                                    {t(currentLocale, "nav.about")}
+                                </Link>
+                            </div>
+                        </div>
 
-                        <Link href={localize("/qa")} className="px-4 py-2 text-sm font-bold tracking-wide text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all">
-                            {t(currentLocale, "nav.qa")}
-                        </Link>
+                        <form onSubmit={handleNavSearchSubmit} className="relative w-full max-w-[320px] justify-self-center">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-accent/70" />
+                            <input
+                                value={navSearch}
+                                onChange={(e) => setNavSearch(e.target.value)}
+                                placeholder={currentLocale === "ur" ? "???? ????" : "Search..."}
+                                className="w-full rounded-full border border-accent/20 bg-ivory/70 py-2.5 pl-8 pr-3 text-sm text-primary outline-none focus:ring-2 focus:ring-accent/30"
+                            />
+                        </form>
 
-                        <Link href={localize("/search")} className="px-4 py-2 text-sm font-bold tracking-wide text-primary bg-accent/10 hover:bg-accent/20 rounded-full transition-all flex items-center gap-2 border border-accent/25">
-                            <Search className="w-4 h-4 text-accent" />
-                            {t(currentLocale, "nav.search")}
-                        </Link>
+                        <div className="flex items-center justify-end gap-2">
+                            <HeadlessMenu as="div" className="relative">
+                                <HeadlessMenu.Button className="flex items-center gap-1.5 px-3 py-2 text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all">
+                                    <Globe size={17} />
+                                    <span className="text-xs font-semibold tracking-wide">{currentLocale.toUpperCase()}</span>
+                                </HeadlessMenu.Button>
+                                <Transition
+                                    as={React.Fragment}
+                                    enter="transition ease-out duration-150"
+                                    enterFrom="transform opacity-0 scale-95 -translate-y-1"
+                                    enterTo="transform opacity-100 scale-100 translate-y-0"
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="transform opacity-100 scale-100"
+                                    leaveTo="transform opacity-0 scale-95"
+                                >
+                                    <HeadlessMenu.Items className="absolute right-0 mt-2 w-44 origin-top-right rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2">
+                                        {LANGUAGES.map((lang) => (
+                                            <HeadlessMenu.Item key={lang.code}>
+                                                {({ active }) => (
+                                                    <Link
+                                                        href={switchLocale(lang.code)}
+                                                        className={cn(
+                                                            "flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all",
+                                                            active ? "bg-accent/10 text-accent" : "text-foreground/70"
+                                                        )}
+                                                    >
+                                                        <span className="text-[11px] font-bold w-6">{lang.short}</span>
+                                                        {lang.name}
+                                                    </Link>
+                                                )}
+                                            </HeadlessMenu.Item>
+                                        ))}
+                                    </HeadlessMenu.Items>
+                                </Transition>
+                            </HeadlessMenu>
 
-                        <Link href={localize("/about")} className="px-4 py-2 text-sm font-bold tracking-wide text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all">
-                            {t(currentLocale, "nav.about")}
-                        </Link>
-
-                        {/* <Link href={localize("/donate")} className="flex items-center gap-2 px-5 py-2.5 bg-accent text-white text-sm font-bold tracking-wide rounded-full hover:bg-accent-light transition-all shadow-md shadow-accent/25 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5">
-                            <Heart size={15} fill="currentColor" />
-                            {t(currentLocale, "nav.donate")}
-                        </Link> */}
+                            <Link href={localize("/ask")} className="inline-flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-light text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-accent/20">
+                                <MessageCircle size={15} />
+                                {t(currentLocale, "nav.ask")}
+                            </Link>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <HeadlessMenu as="div" className="relative hidden md:inline-block">
-                            <HeadlessMenu.Button className="flex items-center gap-1.5 px-3 py-2 text-accent hover:text-accent-light hover:bg-accent/10 rounded-lg transition-all focus:outline-none">
-                                <Globe size={18} />
-                                <span className="text-xs font-semibold tracking-wide hidden lg:inline">{currentLocale.toUpperCase()}</span>
-                            </HeadlessMenu.Button>
-                            <Transition
-                                as={React.Fragment}
-                                enter="transition ease-out duration-150"
-                                enterFrom="transform opacity-0 scale-95 -translate-y-1"
-                                enterTo="transform opacity-100 scale-100 translate-y-0"
-                                leave="transition ease-in duration-100"
-                                leaveFrom="transform opacity-100 scale-100"
-                                leaveTo="transform opacity-0 scale-95"
-                            >
-                                <HeadlessMenu.Items className="absolute right-0 mt-2 w-44 origin-top-right rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2">
-                                    {LANGUAGES.map((lang) => (
-                                        <HeadlessMenu.Item key={lang.code}>
-                                            {({ active }) => (
-                                                <Link
-                                                    href={switchLocale(lang.code)}
-                                                    className={cn(
-                                                        "flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium transition-all",
-                                                        active ? "bg-accent/10 text-accent" : "text-foreground/70"
-                                                    )}
-                                                >
-                                                    <span className="text-[11px] font-bold w-6">{lang.short}</span>
-                                                    {lang.name}
-                                                </Link>
-                                            )}
-                                        </HeadlessMenu.Item>
-                                    ))}
-                                </HeadlessMenu.Items>
-                            </Transition>
-                        </HeadlessMenu>
-
-                        <Link href={localize("/ask")} className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-light text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-accent/20">
-                            <MessageCircle size={16} />
-                            {t(currentLocale, "nav.ask")}
+                    <div className="flex lg:hidden items-center justify-between gap-3">
+                        <Link href={localize("/")} className="flex items-center gap-2 shrink-0">
+                            <Image
+                                src="/logo.png"
+                                alt="Ask Your Mufti Logo"
+                                width={190}
+                                height={190}
+                                className="rounded-full object-cover border border-accent/30"
+                                priority
+                            />
+                            
                         </Link>
 
-                        <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-accent/10 rounded-lg transition-colors">
-                            <Menu size={24} className="text-primary" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <HeadlessMenu as="div" className="relative">
+                                <HeadlessMenu.Button className="p-2 rounded-lg hover:bg-accent/10 text-accent inline-flex items-center gap-1">
+                                    <Globe size={18} />
+                                    <span className="text-[11px] font-semibold">{currentLocale.toUpperCase()}</span>
+                                </HeadlessMenu.Button>
+                                <Transition
+                                    as={React.Fragment}
+                                    enter="transition ease-out duration-150"
+                                    enterFrom="transform opacity-0 scale-95 -translate-y-1"
+                                    enterTo="transform opacity-100 scale-100 translate-y-0"
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="transform opacity-100 scale-100"
+                                    leaveTo="transform opacity-0 scale-95"
+                                >
+                                    <HeadlessMenu.Items className="absolute right-0 mt-2 w-40 origin-top-right rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2 z-50">
+                                        {LANGUAGES.map((lang) => (
+                                            <HeadlessMenu.Item key={lang.code}>
+                                                {({ active }) => (
+                                                    <Link
+                                                        href={switchLocale(lang.code)}
+                                                        className={cn(
+                                                            "flex items-center gap-2 w-full px-3 py-2 text-sm transition-all",
+                                                            active ? "bg-accent/10 text-accent" : "text-foreground/70"
+                                                        )}
+                                                    >
+                                                        <span className="text-[11px] font-bold w-6">{lang.short}</span>
+                                                        {lang.name}
+                                                    </Link>
+                                                )}
+                                            </HeadlessMenu.Item>
+                                        ))}
+                                    </HeadlessMenu.Items>
+                                </Transition>
+                            </HeadlessMenu>
+                            <Link href={localize("/search")} className="p-2 rounded-lg hover:bg-accent/10 text-accent">
+                                <Search size={20} />
+                            </Link>
+                            <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg hover:bg-accent/10 text-primary">
+                                <Menu size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.nav>

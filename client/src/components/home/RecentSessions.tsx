@@ -41,7 +41,7 @@ export const RecentSessions = () => {
     }, []);
 
     return (
-        <section className="py-16 md:py-24 px-6 md:px-12 bg-sand">
+        <section className="py-16 md:py-24 px-4 sm:px-6 md:px-12 bg-sand">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
