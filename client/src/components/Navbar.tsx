@@ -97,7 +97,7 @@ export const Navbar = () => {
                                
                             </Link>
 
-                            <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+                            <div className="flex items-center gap-1 min-w-0 overflow-visible">
                                 <Link href={localize("/")} className="px-3 py-2 text-xs font-bold tracking-wide text-accent hover:bg-accent/10 rounded-lg transition-all whitespace-nowrap">
                                     {t(currentLocale, "nav.home")}
                                 </Link>
@@ -116,7 +116,7 @@ export const Navbar = () => {
                                         leaveFrom="transform opacity-100 scale-100"
                                         leaveTo="transform opacity-0 scale-95"
                                     >
-                                        <HeadlessMenu.Items className="absolute left-0 mt-2 w-52 origin-top-left rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2">
+                                        <HeadlessMenu.Items className="absolute left-0 mt-2 w-52 origin-top-left rounded-xl bg-white border border-accent/15 shadow-xl focus:outline-none flex flex-col py-2 z-50">
                                             {topics.map((topic) => (
                                                 <HeadlessMenu.Item key={topic.slug}>
                                                     {({ active }) => (
