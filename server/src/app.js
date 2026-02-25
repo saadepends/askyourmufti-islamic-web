@@ -14,7 +14,22 @@ const app = express();
 
 connectDB();
 
-app.use(cors());
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            return callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+    })
+);
 app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/sessions', sessionRoutes);
