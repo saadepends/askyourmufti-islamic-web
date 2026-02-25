@@ -14,11 +14,43 @@ const nextConfig: NextConfig = {
     async rewrites() {
         return [
             {
-                source: "/:locale(en|ur|de|fr|es)",
+                source: "/en",
                 destination: "/",
             },
             {
-                source: "/:locale(en|ur|de|fr|es)/:path*",
+                source: "/ur",
+                destination: "/",
+            },
+            {
+                source: "/de",
+                destination: "/",
+            },
+            {
+                source: "/fr",
+                destination: "/",
+            },
+            {
+                source: "/es",
+                destination: "/",
+            },
+            {
+                source: "/en/:path*",
+                destination: "/:path*",
+            },
+            {
+                source: "/ur/:path*",
+                destination: "/:path*",
+            },
+            {
+                source: "/de/:path*",
+                destination: "/:path*",
+            },
+            {
+                source: "/fr/:path*",
+                destination: "/:path*",
+            },
+            {
+                source: "/es/:path*",
                 destination: "/:path*",
             },
         ];
