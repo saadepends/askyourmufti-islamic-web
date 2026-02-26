@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Eye, ArrowUpRight, TrendingUp, MessageCircle, Clock, Loader2 } from "lucide-react";
-import { getLocaleFromPathname, withLocale, Locale } from "@/lib/i18n";
+import { buildQuestionHref, getLocaleFromPathname, withLocale, Locale } from "@/lib/i18n";
 import { t } from "@/lib/messages";
 import { translateTopicLabel } from "@/lib/topicLabels";
 
@@ -12,6 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface TrendingFAQ {
     _id: string;
+    qid?: string;
     question: string;
     viewCount?: number;
     sessionNumber?: string;
@@ -115,7 +116,7 @@ export const MostViewedQuestions = () => {
                         {items.map((item, index) => (
                             <Link
                                 key={item._id}
-                                href={withLocale(`/question/${item.slug}`, locale)}
+                                href={buildQuestionHref(item.slug, locale, item.qid)}
                                 className="group relative flex gap-4 sm:gap-5 bg-white rounded-2xl p-4 sm:p-6 border border-accent/8 hover:border-accent/25 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 transition-all duration-300"
                             >
                                 <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary-dark flex items-center justify-center shadow-md shadow-primary/15 group-hover:scale-105 transition-transform">

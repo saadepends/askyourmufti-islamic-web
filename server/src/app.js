@@ -9,6 +9,7 @@ const topicRoutes = require('./routes/topicRoutes');
 const authRoutes = require('./routes/authRoutes');
 const donationRoutes = require('./routes/donationRoutes');
 const askedQuestionRoutes = require('./routes/askedQuestionRoutes');
+const seoSettingsRoutes = require('./routes/seoSettingsRoutes');
 
 const app = express();
 
@@ -38,6 +39,8 @@ app.use('/api/topics', topicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/asked-questions', askedQuestionRoutes);
+app.use('/api/seo-settings', seoSettingsRoutes);
+app.use('/api/seo', seoSettingsRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

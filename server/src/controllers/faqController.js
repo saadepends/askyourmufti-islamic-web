@@ -1,4 +1,5 @@
 const FAQ = require('../models/FAQ');
+const Topic = require('../models/Topic');
 const SUPPORTED_LANGS = ['en', 'ur', 'de', 'fr', 'es'];
 
 const resolveLang = (lang) => {
@@ -22,6 +23,78 @@ const localizeFAQ = (faq, lang) => {
     };
 };
 
+const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const normalizeTopicName = (value = '') => String(value).trim().replace(/\s+/g, ' ');
+
+const slugify = (value = '') =>
+    String(value)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+const buildUniqueSlug = (baseSlug, usedSlugs) => {
+    let slug = baseSlug || 'topic';
+    if (!usedSlugs.has(slug)) {
+        usedSlugs.add(slug);
+        return slug;
+    }
+
+    let suffix = 2;
+    while (usedSlugs.has(`${slug}-${suffix}`)) suffix += 1;
+    const unique = `${slug}-${suffix}`;
+    usedSlugs.add(unique);
+    return unique;
+};
+
+const ensureTopicsFromBulkRows = async (rows) => {
+    const uniqueByLowerName = new Map();
+    rows.forEach((row) => {
+        const name = normalizeTopicName(row.Topic);
+        if (!name) return;
+        const key = name.toLowerCase();
+        if (!uniqueByLowerName.has(key)) uniqueByLowerName.set(key, name);
+    });
+
+    const topicNames = [...uniqueByLowerName.values()];
+    if (topicNames.length === 0) return 0;
+
+    const existingTopics = await Topic.find({}).select('name slug').lean();
+    const existingNameSet = new Set(existingTopics.map((t) => String(t.name || '').toLowerCase()));
+    const usedSlugs = new Set(existingTopics.map((t) => String(t.slug || '').toLowerCase()).filter(Boolean));
+
+    const toCreate = [];
+    topicNames.forEach((name) => {
+        const lower = name.toLowerCase();
+        if (existingNameSet.has(lower)) return;
+
+        const slug = buildUniqueSlug(slugify(name), usedSlugs);
+        toCreate.push({
+            name,
+            slug,
+            description: `${name} related Islamic Q&A.`,
+            subtopics: [],
+            seoTitle: `${name} - Islamic Q&A`,
+            seoDescription: `Browse Islamic questions and answers about ${name}.`,
+        });
+        existingNameSet.add(lower);
+    });
+
+    if (toCreate.length === 0) return 0;
+
+    try {
+        await Topic.insertMany(toCreate, { ordered: false });
+        return toCreate.length;
+    } catch (error) {
+        if (error && error.code === 11000) {
+            const inserted = Array.isArray(error.insertedDocs) ? error.insertedDocs.length : 0;
+            return inserted;
+        }
+        throw error;
+    }
+};
+
 // @desc    Get all questions
 // @route   GET /api/qa
 // @access  Public
@@ -41,11 +114,42 @@ const getFAQs = async (req, res) => {
 const getFAQBySlug = async (req, res) => {
     try {
         const lang = resolveLang(req.query.lang);
-        const faq = await FAQ.findOneAndUpdate(
-            { slug: req.params.slug },
-            { $inc: { viewCount: 1 } },
-            { new: true }
-        );
+        const requestedQid = typeof req.query.qid === 'string' ? req.query.qid.trim() : '';
+
+        let faq = null;
+        if (requestedQid) {
+            faq = await FAQ.findOneAndUpdate(
+                { qid: requestedQid },
+                { $inc: { viewCount: 1 } },
+                { new: true }
+            );
+        }
+
+        if (!faq) {
+            const rawSlug = decodeURIComponent(String(req.params.slug || '')).trim();
+            const normalizedSlug = rawSlug.replace(/^\/+|\/+$/g, '').split('#')[0];
+            const exactCandidates = Array.from(new Set([
+                rawSlug,
+                `/${rawSlug}`,
+                normalizedSlug,
+                `/${normalizedSlug}`,
+            ].filter(Boolean)));
+
+            faq = await FAQ.findOneAndUpdate(
+                { slug: { $in: exactCandidates } },
+                { $inc: { viewCount: 1 } },
+                { new: true, sort: { createdAt: -1 } }
+            );
+
+            if (!faq && normalizedSlug) {
+                faq = await FAQ.findOneAndUpdate(
+                    { slug: { $regex: new RegExp(`^/?${escapeRegex(normalizedSlug)}(?:#.*)?$`, 'i') } },
+                    { $inc: { viewCount: 1 } },
+                    { new: true, sort: { createdAt: -1 } }
+                );
+            }
+        }
+
         if (!faq) return res.status(404).json({ message: 'Question not found' });
         res.json(localizeFAQ(faq, lang));
     } catch (error) {
@@ -173,6 +277,8 @@ const bulkUploadFAQs = async (req, res) => {
             return res.status(400).json({ message: 'Invalid data format' });
         }
 
+        const createdTopics = await ensureTopicsFromBulkRows(rows);
+
         const incomingQids  = rows.map(r => r.Q_ID).filter(Boolean);
         const incomingSlugs = rows.map(r => r.Slug).filter(Boolean);
 
@@ -252,6 +358,7 @@ const bulkUploadFAQs = async (req, res) => {
             processed: rows.length,
             inserted:  toInsert.length,
             skipped:   rows.length - toInsert.length,
+            topicsCreated: createdTopics,
         });
     } catch (error) {
         console.error('Bulk upload error:', error);

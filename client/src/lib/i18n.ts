@@ -38,3 +38,16 @@ export function withLocale(pathname: string, locale: Locale): string {
     const clean = stripLocaleFromPathname(pathname);
     return clean === "/" ? `/${locale}` : `/${locale}${clean}`;
 }
+
+export function normalizeQuestionSlug(slug: string): string {
+    if (!slug) return "";
+    const withoutHash = slug.trim().split("#")[0] || "";
+    return withoutHash.replace(/^\/+|\/+$/g, "");
+}
+
+export function buildQuestionHref(slug: string, locale: Locale, qid?: string): string {
+    const normalizedSlug = normalizeQuestionSlug(slug);
+    const encodedSlug = encodeURIComponent(normalizedSlug);
+    const qidQuery = qid ? `?qid=${encodeURIComponent(qid)}` : "";
+    return withLocale(`/question/${encodedSlug}${qidQuery}`, locale);
+}

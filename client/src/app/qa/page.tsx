@@ -14,13 +14,14 @@ import {
     Tag,
     Hash,
 } from "lucide-react";
-import { getLocaleFromPathname, withLocale } from "@/lib/i18n";
+import { buildQuestionHref, getLocaleFromPathname, withLocale } from "@/lib/i18n";
 import { translateTopicLabel } from "@/lib/topicLabels";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface FAQ {
     _id: string;
+    qid?: string;
     question: string;
     shortAnswer: string;
     sessionNumber: string;
@@ -176,7 +177,7 @@ export default function QAPage() {
                                 {filteredFaqs.map((faq) => (
                                     <Link
                                         key={faq._id}
-                                        href={withLocale(`/question/${faq.slug}`, locale)}
+                                        href={buildQuestionHref(faq.slug, locale, faq.qid)}
                                         className="group bg-white rounded-2xl border border-accent/10 p-6 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 transition-all duration-300"
                                     >
                                         <div className="flex items-start gap-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -17,7 +17,7 @@ import {
     MessageCircle,
     BookOpen,
 } from "lucide-react";
-import { getLocaleFromPathname, withLocale } from "@/lib/i18n";
+import { buildQuestionHref, getLocaleFromPathname, normalizeQuestionSlug, withLocale } from "@/lib/i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -40,8 +40,10 @@ interface FAQ {
 export default function QuestionDetailPage() {
     const params = useParams();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const locale = getLocaleFromPathname(pathname || "/");
-    const slug = params.slug as string;
+    const slug = decodeURIComponent((params.slug as string) || "");
+    const qid = searchParams.get("qid") || "";
     const [faq, setFaq] = useState<FAQ | null>(null);
     const [relatedFaqs, setRelatedFaqs] = useState<FAQ[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,7 +51,9 @@ export default function QuestionDetailPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`${API_URL}/qa/slug/${slug}?lang=${locale}`);
+                const normalizedSlug = normalizeQuestionSlug(slug);
+                const qidQuery = qid ? `&qid=${encodeURIComponent(qid)}` : "";
+                const res = await fetch(`${API_URL}/qa/slug/${encodeURIComponent(normalizedSlug)}?lang=${locale}${qidQuery}`);
                 if (!res.ok) {
                     setLoading(false);
                     return;
@@ -63,7 +67,7 @@ export default function QuestionDetailPage() {
                     const relData = await relRes.json();
                     setRelatedFaqs(
                         (Array.isArray(relData) ? relData : [])
-                            .filter((q: FAQ) => q.slug !== slug)
+                            .filter((q: FAQ) => q._id !== data._id)
                             .slice(0, 5)
                     );
                 }
@@ -74,7 +78,7 @@ export default function QuestionDetailPage() {
             }
         };
         fetchData();
-    }, [slug, locale]);
+    }, [slug, locale, qid]);
 
     if (loading) {
         return (
@@ -225,7 +229,7 @@ export default function QuestionDetailPage() {
                                 {relatedFaqs.map((related) => (
                                     <Link
                                         key={related._id}
-                                        href={withLocale(`/question/${related.slug}`, locale)}
+                                        href={buildQuestionHref(related.slug, locale, related.qid)}
                                         className="group flex items-start gap-4 bg-white rounded-2xl border border-accent/10 p-5 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 transition-all duration-300"
                                     >
                                         <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-accent/20 transition-colors">

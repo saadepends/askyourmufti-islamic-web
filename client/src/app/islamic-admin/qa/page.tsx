@@ -104,7 +104,7 @@ export default function QAManagerPage() {
     const [topicOptions, setTopicOptions] = useState<TopicItem[]>([]);
     const [topicsLoading, setTopicsLoading] = useState(false);
     const [formData, setFormData] = useState(emptyForm);
-    const [uploadResult, setUploadResult] = useState<{ inserted: number; skipped: number } | null>(null);
+    const [uploadResult, setUploadResult] = useState<{ inserted: number; skipped: number; topicsCreated: number } | null>(null);
     const [uploadError, setUploadError] = useState("");
     const [uploading, setUploading] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
@@ -322,7 +322,11 @@ export default function QAManagerPage() {
 
             const data = await res.json();
             if (res.ok) {
-                setUploadResult({ inserted: data.inserted, skipped: data.skipped });
+                setUploadResult({
+                    inserted: Number(data.inserted || 0),
+                    skipped: Number(data.skipped || 0),
+                    topicsCreated: Number(data.topicsCreated || 0),
+                });
                 fetchQAs();
             } else {
                 throw new Error(data.message || "Upload failed");
@@ -491,6 +495,7 @@ const filteredQAs = qaList.filter(
                                 <div className="text-sm">
                                     <p className="font-bold text-green-700">Upload successful!</p>
                                     <p className="text-green-600">{uploadResult.inserted} inserted, {uploadResult.skipped} skipped (duplicates)</p>
+                                    <p className="text-green-700">{uploadResult.topicsCreated} new topic(s) created automatically</p>
                                 </div>
                             </div>
                         )}

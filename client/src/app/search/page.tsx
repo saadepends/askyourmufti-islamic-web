@@ -8,7 +8,7 @@ import { Search as SearchIcon, MessageSquare, Video, ArrowRight, Bookmark, Loade
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
-import { getLocaleFromPathname, withLocale } from "@/lib/i18n";
+import { buildQuestionHref, getLocaleFromPathname, withLocale } from "@/lib/i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -55,7 +55,7 @@ export default function SearchPage() {
                 preview: String(f.shortAnswer || f.fullAnswer || "").slice(0, 150),
                 topic: String(f.topic || "Q&A"),
                 date: f.createdAt ? new Date(f.createdAt).toLocaleDateString() : "",
-                href: withLocale(`/question/${f.slug || ""}`, locale),
+                href: buildQuestionHref(String(f.slug || ""), locale, String(f.qid || "")),
             }));
 
             const transformedSessions: SearchResult[] = (Array.isArray(sessionsData) ? sessionsData : []).map((s) => ({
